@@ -1,24 +1,23 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import "react-native-get-random-values";
+import { Stack } from "expo-router";
+import { PhantomProvider, AddressType, darkTheme } from "@phantom/react-native-sdk";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+export default function Layout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <PhantomProvider
+      config={{
+        providers: ["google", "apple"],
+        appId: "3f772481-ad8b-413b-a894-732a8bfadb57",
+        scheme: "aranium",
+        addressTypes: [AddressType.solana],
+        authOptions: {
+          redirectUrl: "aranium://phantom-auth-callback",
+        },
+      }}
+      theme={darkTheme}
+      appName="ARAN"
+    >
+      <Stack screenOptions={{ headerShown: false }} />
+    </PhantomProvider>
   );
 }

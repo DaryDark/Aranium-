@@ -1,47 +1,30 @@
 {
   "expo": {
-    "name": "aranium",
+    "name": "ARAN",
     "slug": "aranium",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "scheme": "aranium",
-    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.daydarck.aranium"
+      "backgroundColor": "#0a1f44"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.daydarck.aranium"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-secure-store"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "614b5d75-9cfd-4603-9443-b94d9ad6c794"
+        "backgroundColor": "#0a1f44"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/614b5d75-9cfd-4603-9443-b94d9ad6c794"
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9dd9f4bf-7bf4-472c-8dba-bd7e1275294c"
+      }
     }
   }
 }

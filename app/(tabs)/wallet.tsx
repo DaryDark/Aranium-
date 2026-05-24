@@ -1,60 +1,200 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Pressable } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+} from "react-native";
+import { connectPhantom } from "../../phantom";
 
 export default function WalletScreen() {
-  const [receiptAmount, setReceiptAmount] = useState(0);
-  const [receiptPoints, setReceiptPoints] = useState(0);
+  const [tokens, setTokens] = useState(0);
+  const [points, setPoints] = useState(100);
+  const [money, setMoney] = useState("");
+  const [walletStatus, setWalletStatus] = useState("Not connected");
 
-  useEffect(() => {
-    loadWallet();
-  }, []);
+  const convertMoney = () => {
+    const value = Number(money);
+    if (!value || value <= 0) return;
 
-  async function loadWallet() {
-    try {
-      const amount = await AsyncStorage.getItem("walletReceiptAmount");
-      const points = await AsyncStorage.getItem("walletReceiptPoints");
+    const newTokens = value * 10;
+    setTokens((prev) => prev + newTokens);
+    setMoney("");
+  };
 
-      setReceiptAmount(amount ? Number(amount) : 0);
-      setReceiptPoints(points ? Number(points) : 0);
-    } catch {
-      setReceiptAmount(0);
-      setReceiptPoints(0);
-    }
-  }
+  const handleConnectWallet = async () => {
+    setWalletStatus("Opening Phantom...");
+    await connectPhantom();
+  };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#07111F", padding: 20, paddingTop: 70 }}>
-      <Text style={{ color: "#F5F7FA", fontSize: 30, fontWeight: "800", marginBottom: 20 }}>
-        Wallet
-      </Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Wallet</Text>
+      <Text style={styles.subtitle}>Convert money into Aranium tokens</Text>
 
-      <View style={{ backgroundColor: "#0D1B2A", borderRadius: 20, padding: 20, marginBottom: 16 }}>
-        <Text style={{ color: "#98A7B8", marginBottom: 8 }}>Total din bonuri</Text>
-        <Text style={{ color: "#F5F7FA", fontSize: 28, fontWeight: "800" }}>
-          {receiptAmount.toFixed(2)} EUR
-        </Text>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>🔗 Phantom Wallet</Text>
+
+        <TouchableOpacity style={styles.connectButton} onPress={handleConnectWallet}>
+          <Text style={styles.connectText}>Connect Wallet</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.status}>{walletStatus}</Text>
       </View>
 
-      <View style={{ backgroundColor: "#0D1B2A", borderRadius: 20, padding: 20, marginBottom: 16 }}>
-        <Text style={{ color: "#98A7B8", marginBottom: 8 }}>Puncte</Text>
-        <Text style={{ color: "#FF8A1F", fontSize: 28, fontWeight: "800" }}>
-          {receiptPoints}
-        </Text>
+      <View style={styles.bigCard}>
+        <Text style={styles.label}>TOKEN BALANCE</Text>
+        <Text style={styles.tokenNumber}>{tokens.toFixed(2)}</Text>
+        <Text style={styles.arm}>ARM</Text>
+
+        <View style={styles.row}>
+          <View style={styles.smallBox}>
+            <Text style={styles.smallLabel}>Cash balance</Text>
+            <Text style={styles.smallValue}>$0.00</Text>
+          </View>
+
+          <View style={styles.smallBox}>
+            <Text style={styles.smallLabel}>Points</Text>
+            <Text style={styles.smallValue}>{points}</Text>
+          </View>
+        </View>
       </View>
 
-      <Pressable
-        onPress={loadWallet}
-        style={{
-          backgroundColor: "#1E3A5F",
-          padding: 16,
-          borderRadius: 16,
-        }}
-      >
-        <Text style={{ textAlign: "center", fontWeight: "800", color: "#F5F7FA", fontSize: 16 }}>
-          Refresh Wallet
-        </Text>
-      </Pressable>
-    </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>↕ Convert money to tokens</Text>
+        <Text style={styles.subtitle}>Rate: $1 = 10 ARM</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="$ 0.00"
+          placeholderTextColor="#7f8da3"
+          keyboardType="numeric"
+          value={money}
+          onChangeText={setMoney}
+        />
+
+        <TouchableOpacity style={styles.convertButton} onPress={convertMoney}>
+          <Text style={styles.connectText}>Convert</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ height: 60 }} />
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#061426",
+    padding: 20,
+  },
+  title: {
+    color: "#ffffff",
+    fontSize: 36,
+    fontWeight: "800",
+    marginTop: 20,
+  },
+  subtitle: {
+    color: "#91a0b6",
+    fontSize: 16,
+    marginTop: 6,
+    marginBottom: 18,
+  },
+  card: {
+    backgroundColor: "#0d2038",
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#1d3555",
+  },
+  bigCard: {
+    backgroundColor: "#0b1f38",
+    borderRadius: 28,
+    padding: 24,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#1d3555",
+  },
+  cardTitle: {
+    color: "#ffffff",
+    fontSize: 22,
+    fontWeight: "800",
+    marginBottom: 16,
+  },
+  connectButton: {
+    backgroundColor: "#ff914d",
+    padding: 18,
+    borderRadius: 18,
+    alignItems: "center",
+  },
+  convertButton: {
+    backgroundColor: "#ff914d",
+    padding: 18,
+    borderRadius: 18,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  connectText: {
+    color: "#07111f",
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  status: {
+    color: "#91a0b6",
+    marginTop: 14,
+    fontSize: 14,
+  },
+  label: {
+    color: "#91a0b6",
+    fontSize: 14,
+    letterSpacing: 2,
+  },
+  tokenNumber: {
+    color: "#ffffff",
+    fontSize: 64,
+    fontWeight: "900",
+    marginTop: 14,
+  },
+  arm: {
+    color: "#ff914d",
+    fontSize: 22,
+    fontWeight: "700",
+  },
+  row: {
+    flexDirection: "row",
+    gap: 14,
+    marginTop: 24,
+  },
+  smallBox: {
+    flex: 1,
+    backgroundColor: "#102744",
+    borderRadius: 18,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "#1d3555",
+  },
+  smallLabel: {
+    color: "#91a0b6",
+    fontSize: 14,
+  },
+  smallValue: {
+    color: "#ffffff",
+    fontSize: 22,
+    fontWeight: "800",
+    marginTop: 8,
+  },
+  input: {
+    backgroundColor: "#102744",
+    color: "#ffffff",
+    fontSize: 34,
+    fontWeight: "800",
+    padding: 20,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#1d3555",
+  },
+});

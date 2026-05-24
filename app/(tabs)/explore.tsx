@@ -1,112 +1,254 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+type WalletData = {
+  aranFromReceipts: number;
+  aranFromSteps: number;
+  aranFromSavings: number;
+  aranClaimed: number;
+};
 
-export default function TabTwoScreen() {
+const WALLET_KEY = "aran_wallet_full";
+
+function toNum(v: any) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function stepsToAran(steps: number) {
+  const aran = Math.floor(steps / 1000);
+  return Math.min(aran, 10);
+}
+
+export default function ExploreScreen() {
+  const [manualSteps, setManualSteps] = useState("");
+  const [todaySteps, setTodaySteps] = useState(0);
+  const [todayAran, setTodayAran] = useState(0);
+
+  function simulateSteps() {
+    const steps = toNum(String(manualSteps).replace(",", "."));
+    if (steps <= 0) {
+      Alert.alert("Eroare", "Introdu un număr de pași mai mare decât 0");
+      return;
+    }
+
+    const aran = stepsToAran(steps);
+    setTodaySteps(steps);
+    setTodayAran(aran);
+
+    Alert.alert("Simulare făcută", `Pași: ${steps}\nARAN: ${aran}`);
+  }
+
+  function quickAdd1000() {
+    const steps = todaySteps + 1000;
+    const aran = stepsToAran(steps);
+    setTodaySteps(steps);
+    setTodayAran(aran);
+  }
+
+  function quickAdd5000() {
+    const steps = todaySteps + 5000;
+    const aran = stepsToAran(steps);
+    setTodaySteps(steps);
+    setTodayAran(aran);
+  }
+
+  function resetSimulation() {
+    setManualSteps("");
+    setTodaySteps(0);
+    setTodayAran(0);
+  }
+
+  async function saveToWallet() {
+    try {
+      const savedWallet = await AsyncStorage.getItem(WALLET_KEY);
+
+      const wallet: WalletData = savedWallet
+        ? JSON.parse(savedWallet)
+        : {
+            aranFromReceipts: 0,
+            aranFromSteps: 0,
+            aranFromSavings: 0,
+            aranClaimed: 0,
+          };
+
+      const nextWallet: WalletData = {
+        ...wallet,
+        aranFromSteps: todayAran,
+      };
+
+      await AsyncStorage.setItem(WALLET_KEY, JSON.stringify(nextWallet));
+      Alert.alert("Succes", `Ai salvat ${todayAran} ARAN din pași în wallet`);
+    } catch (e) {
+      console.log("saveToWallet error:", e);
+      Alert.alert("Eroare", "Nu am putut salva în wallet");
+    }
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.title}>Pași</Text>
+
+      <View style={styles.card}>
+        <Text style={styles.label}>Simulare pași</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: 3200"
+          placeholderTextColor="#8fa3bf"
+          keyboardType="numeric"
+          value={manualSteps}
+          onChangeText={setManualSteps}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+
+        <TouchableOpacity style={styles.blueBtn} onPress={simulateSteps}>
+          <Text style={styles.btnText}>GENEREAZĂ DIN INPUT</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.greenBtn} onPress={quickAdd1000}>
+          <Text style={styles.btnText}>+1000 PAȘI</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.orangeBtn} onPress={quickAdd5000}>
+          <Text style={styles.btnText}>+5000 PAȘI</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.walletBtn} onPress={saveToWallet}>
+          <Text style={styles.btnText}>SALVEAZĂ ÎN WALLET</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.resetBtn} onPress={resetSimulation}>
+          <Text style={styles.btnText}>RESET</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.smallCard}>
+          <Text style={styles.smallLabel}>Pași azi</Text>
+          <Text style={styles.smallValue}>{todaySteps}</Text>
+        </View>
+
+        <View style={styles.smallCard}>
+          <Text style={styles.smallLabel}>ARAN azi</Text>
+          <Text style={styles.smallValue}>{todayAran}</Text>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.rule}>1000 pași = 1 ARAN</Text>
+        <Text style={styles.rule}>Limită zilnică = 10 ARAN</Text>
+        <Text style={styles.rule}>Simularea este bună pentru test și UI</Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: "#071427",
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  content: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+  title: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "800",
+    marginBottom: 12,
+  },
+  card: {
+    backgroundColor: "#0d1f3c",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  label: {
+    color: "#8fa3bf",
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  input: {
+    backgroundColor: "#132847",
+    color: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 15,
+    marginBottom: 10,
+  },
+  blueBtn: {
+    backgroundColor: "#3498db",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  greenBtn: {
+    backgroundColor: "#16a085",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  orangeBtn: {
+    backgroundColor: "#f39c12",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  walletBtn: {
+    backgroundColor: "#8e44ad",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  resetBtn: {
+    backgroundColor: "#c0392b",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  btnText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  smallCard: {
+    width: "48.5%",
+    backgroundColor: "#0d1f3c",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  smallLabel: {
+    color: "#8fa3bf",
+    fontSize: 13,
+    marginBottom: 6,
+  },
+  smallValue: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "800",
+  },
+  rule: {
+    color: "#fff",
+    fontSize: 14,
+    marginBottom: 6,
   },
 });
