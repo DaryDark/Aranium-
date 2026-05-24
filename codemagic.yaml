@@ -1,0 +1,10 @@
+workflows:
+  expo-android:
+    name: Aranium Android
+    environment:
+      node: latest
+    scripts:
+      - npm install
+      - npx expo export
+    artifacts:
+      - dist/**
