@@ -5,6 +5,7 @@
   "build": {
     "preview": {
       "distribution": "internal",
+      "installCommand": "npm install --legacy-peer-deps",
       "android": {
         "buildType": "apk"
       }
