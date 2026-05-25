@@ -34,6 +34,7 @@
     "expo-image": "~1.13.0",
     "expo-image-picker": "~15.1.0",
     "expo-linking": "~6.3.1",
+    "expo-modules-core": "~1.12.26",
     "expo-random": "^14.0.1",
     "expo-router": "~3.5.24",
     "expo-secure-store": "~13.0.2",
@@ -62,12 +63,12 @@
     "typescript": "~5.3.3"
   },
   "devDependencies": {
-    "@types/react": "~19.2.10",
+    "@types/react": "~18.2.79",
     "ajv": "^8.20.0",
     "ajv-keywords": "^5.1.0",
     "eslint": "^9.25.0",
-    "eslint-config-expo": "~55.0.0",
-    "typescript": "~5.9.2"
+    "eslint-config-expo": "~7.1.2",
+    "typescript": "~5.3.3"
   },
   "private": true
 }
