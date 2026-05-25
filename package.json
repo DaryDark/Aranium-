@@ -30,7 +30,6 @@
     "expo-dev-client": "~4.0.29",
     "expo-font": "~12.0.10",
     "expo-haptics": "~13.0.1",
-    "expo-health-connect": "^0.1.1",
     "expo-image": "~1.13.0",
     "expo-image-picker": "~15.1.0",
     "expo-linking": "~6.3.1",
